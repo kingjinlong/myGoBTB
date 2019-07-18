@@ -84,12 +84,12 @@ def test_movement_thread2():
     print(spread_data)
 
     ###创建一个空的order数据框
-    positable=np.zeros(shape=(0,aa_data.columns.size))
+    positable=np.zeros(shape=(len(aa_data),aa_data.columns.size))
     df_empty = pd.DataFrame(positable)
     df_empty.columns=commodity_name
-    print(df_empty)
     # df_empty['datetime']=cc_data['datetime']
     # df_empty = df_empty.set_index('datetime')
+    print(df_empty)
 
 
 
@@ -97,12 +97,17 @@ def test_movement_thread2():
     for index, row in spread_data.iterrows():
         aa = [i[0] for i in sorted(enumerate(row), key=lambda x:x[1])]
         # print(str(index) + str(aa))
-        df_empty=df_empty.append(pd.DataFrame(aa),ignore_index=True)
+        df_empty=df_empty.append(aa)
+        print(ii)
+        print(df_empty.iloc[ii])
+        df_empty.iloc[ii] = aa
+        print(df_empty.iloc[ii])
+        print(aa)
         if ii>20:
             break
         ii = ii+1
 
-    print(df_empty )
+    # print(df_empty )
 
 # #创建一个空的Dataframe
 # result =pd.DataFrame(columns=('idx','degree','weight','diameter'))
