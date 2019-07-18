@@ -96,13 +96,9 @@ def test_movement_thread2():
     ii = 0
     for index, row in spread_data.iterrows():
         aa = [i[0] for i in sorted(enumerate(row), key=lambda x:x[1])]
-        # print(str(index) + str(aa))
-        df_empty=df_empty.append(aa)
-        print(ii)
-        print(df_empty.iloc[ii])
-        df_empty.iloc[ii] = aa
-        print(df_empty.iloc[ii])
-        print(aa)
+        print(str(index) + "    "+ str(aa[0]))
+        for i in range(len(aa)):
+            df_empty.iloc[ii,i] = aa[i]
         if ii>20:
             break
         ii = ii+1
