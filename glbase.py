@@ -201,7 +201,7 @@ def CalMoney(total_money,total_date):
     d1 = datetime.datetime(t1[0], t1[1],t1[2]) #datetime类型
     result.normal_day = (d1 - d).days
     result.max_drawdown = MaxDrawdown(df[code])
-    result.max_duration_in_drawdown = (total_date[min_point_total.index[0]] - total_date[max_point_total.index[0]])
+    # result.max_duration_in_drawdown = (total_date[min_point_total.index[0]] - total_date[max_point_total.index[0]])
     result.sharpe_ratio = sharperatio.iloc[0]
     result.total_return = result.end_balance - result.initial_balance
     result.total_ratio = (result.end_balance - result.initial_balance) / result.initial_balance
@@ -533,7 +533,7 @@ def cal_pos_kl(vc_kl,vc_pos,base):
     result,close_money = cal_tradeDetail(vc_tradeDetail)
     result.start_date = vc_kl[0].date
     result.end_date = vc_kl[len(vc_kl) - 1].date
-    result.normal_day = (result.end_date - result.start_date).days
+    # result.normal_day = (result.end_date - result.start_date).days
     result.trade_day = len(vc_kl)
     result.name = vc_kl[0].name
     vc_net_money = [vc_money[i] - vc_commission[i] for i in range(len(vc_money))]
