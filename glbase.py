@@ -210,7 +210,8 @@ def CalMoney(total_money,total_date):
     if result.total_ratio <= -1:
         result.annul_ratio = -1
     else:
-        result.annul_ratio =  math.pow(1 + result.total_ratio,365/result.normal_day) - 1
+        if result.normal_day > 0:
+            result.annul_ratio =  math.pow(1 + result.total_ratio,365/result.normal_day) - 1
 
     df_sb = df_new['total'].diff()
     df_sb[0] = 0

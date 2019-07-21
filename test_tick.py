@@ -111,14 +111,26 @@ def test(arr):
         indexs.append(arr.index(i))
     return indexs
 
-def test_movement_thread2():
+def test_all():
     print("测试对冲策略")
     date_File = "cu_min.csv"
     cc_data = pd.DataFrame(pd.read_csv(date_File))
-    N=len(cc_data)
-    R = 30
-    H = 30
+    df_empty = pd.DataFrame()
+    for r in range(10,100,3):
+        for h in range(10,100,3):
+            rr = test_movement_thread2(cc_data,r,h)
+            df_empty = df_empty.append({"R":r,"H":h,"RES":rr},ignore_index=True)
+
+    df_empty.to_excel('./result/resutl_all_matri.xlsx',index = True)
+
+
+
+def test_movement_thread2(cc_data,R,H):
+    N = len(cc_data)
     n = N
+    all_date = []
+    all_date = cc_data['datetime'].values
+
     aa_data = pd.DataFrame()
     aa_data["m"] = cc_data['DCE.m1905.close'][0:n]
     aa_data["RM"] = cc_data['CZCE.RM905.close'][0:n]
@@ -129,8 +141,8 @@ def test_movement_thread2():
     #提取商品名字
     commodity_name = aa_data.columns.values.tolist()  
     spread_data = aa_data.diff(periods = R)
+    spread_data_cal_pos = aa_data.diff(periods = 1)
     # print(spread_data)
-
     # positable=np.zeros(shape=(len(aa_data),aa_data.columns.size))
     positable=np.zeros(shape=(0,aa_data.columns.size))
     df_empty = pd.DataFrame(positable)
@@ -138,6 +150,7 @@ def test_movement_thread2():
     # df_empty['datetime']=cc_data['datetime']
     # df_empty = df_empty.set_index('datetime')
     spread_data = spread_data.fillna(0)
+    spread_data_cal_pos = spread_data_cal_pos.fillna(0)
 
     df_pos = pd.DataFrame(positable)
     df_pos.columns = commodity_name
@@ -149,35 +162,41 @@ def test_movement_thread2():
         for i in range(len(row)):
             mulist.append(float(row[i]))
         aa = test(mulist)
-
-
-        # if ii == 12:
-        #     print(((row)))
-        #     mulist = []
-        #     for i in range(len(row)):
-        #         mulist.append(float(row[i]))
-        #     print(test(mulist))
-        # #     print(sorted(enumerate(row)))
-        # #     print(enumerate((row)))
-        #     return
-
+        print(all_date[ii])
         df_empty.loc[index] = aa
         bb = []
         if ii <R:
             bb = [0,0,0,0,0]
         else:
             if (ii - R) % H == 0:
-                #换仓点
+                #换仓点:0是最小
                 for i in range(len(aa)):
                     if aa[i] == 0: bb.append(-1)
-                    if aa[i] == 1: bb.append(-1)
+                    if aa[i] == 1: bb.append(0)
                     if aa[i] == 2: bb.append(0)
-                    if aa[i] == 3: bb.append(1)
+                    if aa[i] == 3: bb.append(0)
                     if aa[i] == 4: bb.append(1)
             else:
                 bb = df_pos.iloc[ii - 1].tolist()
         df_pos.loc[index] = bb
         ii = ii +1
+    
+
+    df_pos['日期'] = cc_data['datetime']
+    aa_data['日期'] = cc_data['datetime']
+
+    glb.glb_initial_money = 50000
+    glb.glb_open_commission = 0
+    glb.glb_close_commission = 0
+    a,b,c,d,e= glb.cal_vc_pos_kl_dataframe(aa_data,df_pos,False,False)
+    # c.to_excel('./result/resutl_all1.xlsx',index = True)
+    print('--------------------')
+    # print(c)
+    # print(c['total'].loc[len(c)-1])
+    # print(all_date)
+    # print(df_pos)
+    # print(aa_data)
+    return c['total'].loc[len(c)-1]
     # print(spread_data[10:15])
     # print(df_empty[10:15])
     # return
@@ -189,7 +208,7 @@ def test_movement_thread2():
     df_pos = df_pos.shift(-1)
     # aa_data["日期"] = cc_data['datetime'][0:500]
     # df_pos["日期"] = cc_data['datetime'][0:500]
-    result = df_pos * spread_data
+    result = df_pos * spread_data_cal_pos
     result = result.fillna(0)
     #列求和
     result = result.cumsum(0)
@@ -197,7 +216,25 @@ def test_movement_thread2():
     result['totalProfit'].plot()
     print(result)
     plt.show()
-test_movement_thread2()
+
+    cc = pd.DataFrame()
+    cc = aa_data
+    cc['m_pos'] = df_pos['m']
+    cc['RM_pos'] = df_pos['RM']
+    cc['y_pos'] = df_pos['y']
+    cc['p_pos'] = df_pos['p']
+    cc['OI_pos'] = df_pos['OI']
+    cc['m_res'] = result['m']
+    cc['RM_res'] = result['RM']
+    cc['y_res'] = result['y']
+    cc['p_res'] = result['p']
+    cc['OI_res'] = result['OI']
+    cc['all_res'] = result['totalProfit']
+    # result.to_csv('./res/res_profit.csv', header=True)
+    cc.to_excel('./result/resutl_all.xlsx',index = False)
+
+test_all()
+# test_movement_thread2()
 # test_movement_thread2()
 
 print('ALL IS END......')
